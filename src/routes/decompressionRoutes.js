@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("node:path");
 
 const upload = require("../middleware/upload");
-const {decompressBuffer} = require("../services/compressionService")
+const {decompressBuffer} = require("../services/compressionService");
 
 const router = express.Router();
 
@@ -15,11 +15,10 @@ router.post("/decompress",upload.single("file"),(req,res,next)=>{
         }
         const {decodedBuffer,fileName} = decompressBuffer(req.file.buffer);
     
-        const outputName = fileName;
         
         res.set({
             "Content-Type": "application/octet-stream",
-            "Content-Disposition": `attachment; filename="${outputName}"`,
+            "Content-Disposition": `attachment; filename="${fileName}"`,
         })
     
         res.send(decodedBuffer);

@@ -6,7 +6,7 @@ const {compressBuffer} = require("../services/compressionService");
 
 const router = express.Router();
 
-router.post("/compress",upload.single("file"),(req3,res,next)=>{
+router.post("/compress",upload.single("file"),(req,res,next)=>{
     try{
         if(!req.file){
             return res.status(400).json({

@@ -1,7 +1,17 @@
 const express = require("express")
 const compressionRoute = require("./routes/compressionRoutes");
 const decompressionRoute = require("./routes/decompressionRoutes");
+const cors = require("cors")
 const app = express();
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    exposedHeaders: [
+        "Content-Disposition",
+        "X-Origin-Size",
+        "X-Compressed-Size"
+    ]
+}));
 
 app.get("/api/health",(req,res)=>{
     res.json({

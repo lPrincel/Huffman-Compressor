@@ -14,7 +14,7 @@ async function compressFile(inputPath, outputPath){
     const root = buildHuffmanTree(FrequencyTable);
     const codes = generateHuffmanCodes(root);
     const encodedBuffer = encodeBuffer(buffer,codes);
-    const header = createHeader(FrequencyTable,buffer.length);
+    const header = createHeader(FrequencyTable,buffer.length,path.basename(inputPath));
     const jointBuffer = Buffer.concat([header,encodedBuffer]);
     await fs.writeFile(outputPath,jointBuffer);
 

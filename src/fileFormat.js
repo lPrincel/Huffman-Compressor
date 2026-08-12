@@ -2,13 +2,13 @@ const MAGIC = Buffer.from("HFC2");
 
 function createHeader(frequencyTable, originalSize, fileName){
     fileNameBuffer = Buffer.from(fileName);
-    const fileNameLength = fileNameBuffer.length;
+    const fileNameByteLength = fileNameBuffer.length;
 
-    if(fileNameLength>255){
+    if(fileNameByteLength>255){
         throw new Error(`Filename exceeds maximum length of 255 bytes (current: ${fileNameByteLength} bytes)`)
     }
 
-    HEADER_SIZE = 4 + 4 + 4 + fileNameByteLength + 1024;
+    const HEADER_SIZE = 4 + 4 + 1 + fileNameByteLength + 1024;
 
     const header = Buffer.alloc(HEADER_SIZE);
 
@@ -20,15 +20,15 @@ function createHeader(frequencyTable, originalSize, fileName){
     header.writeUInt32BE(originalSize,offset);
     offset+=4;
     
-    header.writeUInt8(fileNameLength);
+    header.writeUInt8(fileNameByteLength,offset);
     offset+=1;
 
-    header.writeUInt32BE(fileName,offset);
+    fileNameBuffer.copy(header,offset);
     offset+=fileNameByteLength;
 
     for(let byte=0;byte<=255;byte++){
-        const offset = offset+byte*4;
         header.writeUInt32BE(frequencyTable[byte],offset);
+        offset+=4;
     }
 
     return header;
@@ -36,11 +36,11 @@ function createHeader(frequencyTable, originalSize, fileName){
 
 function parseHeader(compressedFileBuffer){
     let offset = 0;
-    const fileMagic = compressedFileBuffer.subarray(0,4);
+    const fileMagic = compressedFileBuffer.subarray(offset,offset+4);
     offset+=4;
     
     if(!fileMagic.equals(MAGIC)){
-        throw new Error("Invalid compressed file: HFC1 header not found");
+        throw new Error("Invalid compressed file: HFC2 header not found");
     }
     let originalSize=compressedFileBuffer.readUInt32BE(offset);
     offset+=4;
@@ -48,20 +48,20 @@ function parseHeader(compressedFileBuffer){
     let fileNameLength = compressedFileBuffer.readUInt8(offset);
     offset+=1;
 
-    let fileName = compressedFileBuffer.subarray(offset,fileNameLength).toString();
+    let fileName = compressedFileBuffer.subarray(offset,offset+fileNameLength).toString();
     offset+=fileNameLength;
 
     const frequencyTable = Array(256).fill(0);
     
     for(let byte=0;byte<=255;byte++){
-        let offset=offset+4*byte;
         frequencyTable[byte] = compressedFileBuffer.readUInt32BE(offset);
+        offset+=4;
     }
     return {
         originalSize,
-        frequencyTable,
         fileName,
-        payload: compressedFileBuffer.subarray(HEADER_SIZE)
+        frequencyTable,
+        payload: compressedFileBuffer.subarray(offset)
     };
 }
 
