@@ -1,7 +1,7 @@
 const MAGIC = Buffer.from("HFC2");
 
 function createHeader(frequencyTable, originalSize, fileName){
-    fileNameBuffer = Buffer.from(fileName);
+    const fileNameBuffer = Buffer.from(fileName);
     const fileNameByteLength = fileNameBuffer.length;
 
     if(fileNameByteLength>255){

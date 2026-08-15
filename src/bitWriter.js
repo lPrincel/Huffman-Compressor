@@ -1,6 +1,8 @@
 class BitWriter{
-    constructor(){
-        this.Bytes=[];
+    constructor(size){
+        this.EncodedBuffer = Buffer.alloc(size);
+        this.writtenBytes=0;
+        this.size = size;
         this.bitCount=0;
         this.Byte=0;
     }
@@ -12,17 +14,19 @@ class BitWriter{
         this.bitCount++;
 
         if(this.bitCount===8){
-            this.Bytes.push(this.Byte);
+            this.EncodedBuffer[this.writtenBytes] = this.Byte;
             this.Byte=0;
             this.bitCount=0;
+            this.writtenBytes++;
         }
     }
     finish(){
         if(this.bitCount>0){
-            this.Byte=this.Byte<<(8-this.bitCount);
-            this.Bytes.push(this.Byte);
+            this.Byte = this.Byte<<(8-this.bitCount);
+            this.EncodedBuffer[this.writtenBytes] = this.Byte;
+            this.writtenBytes++;
         }
-        return Buffer.from(this.Bytes);
+        return this.EncodedBuffer;
     }
 }
 

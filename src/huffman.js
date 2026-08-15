@@ -63,11 +63,17 @@ function generateHuffmanCodes(root){
     return codes;
 }
 
-function encodeBuffer(buffer,codes){
-    const bitWriter = new BitWriter();
-
+function encodeBuffer(buffer,codes, frequencyTable){
+    
+    let totalBits = 0;
+    frequencyTable.forEach((freq,index) => {
+        if(codes[index]!==null) totalBits += freq*(codes[index].length);
+    })
+    
+    const bitWriter = new BitWriter(Math.ceil(totalBits/8));
+    
     for(const byte of buffer){
-        const code=codes[byte];
+        const code = codes[byte];
         for(const bitCharacter of code){
             bitWriter.writeBit(Number(bitCharacter));
         }
@@ -77,9 +83,16 @@ function encodeBuffer(buffer,codes){
 
 function decodeBuffer(encodedBuffer, root ,originalSize){
     
-    if(root==null){
+    if(!Number.isInteger(originalSize) || originalSize<0){
+        throw new Error("Invalid original file size");
+    }
+
+    if (root === null) {
+        if (originalSize === 0) {
         return Buffer.alloc(0);
-    } 
+        }
+        throw new Error("Invalid compressed file: missing Huffman tree");
+    }
     
     const isRootLeaf = root.left === null && root.right === null;
     
@@ -89,11 +102,14 @@ function decodeBuffer(encodedBuffer, root ,originalSize){
         return Buffer.alloc(originalSize, root.byte);
     }
 
-    let decodedBytes=[];
+    const decodedBuffer = Buffer.alloc(originalSize);
 
+    let bytesWritten = 0;
     let current=root;
-    while(decodedBytes.length < originalSize){
+
+    while(bytesWritten < originalSize){
         const bit = bitReader.readBit();
+
         if(bit===null) throw new Error("Compressed data ended unexpectedly")
         
         current = bit === 0 ? current.left : current.right;
@@ -103,13 +119,14 @@ function decodeBuffer(encodedBuffer, root ,originalSize){
         }
 
         if(current.left==null && current.right==null){
-            decodedBytes.push(current.byte);
+            decodedBuffer[bytesWritten] = current.byte;
+            bytesWritten++;
             current=root;
         }
     }
-    return Buffer.from(decodedBytes);
-}
 
+    return decodedBuffer;
+}
 
 module.exports = {
     buildFrequencyTable,

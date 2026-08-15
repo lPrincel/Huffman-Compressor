@@ -10,7 +10,7 @@ function compressBuffer(inputBuffer,fileName){
     const FrequencyTable=buildFrequencyTable(inputBuffer);
     const root = buildHuffmanTree(FrequencyTable);
     const codes = generateHuffmanCodes(root);
-    const encodedBuffer = encodeBuffer(inputBuffer,codes);
+    const encodedBuffer = encodeBuffer(inputBuffer,codes, FrequencyTable);
     const header = createHeader(FrequencyTable,inputBuffer.length,fileName);
     const compressedBuffer = Buffer.concat([header,encodedBuffer]);
 
@@ -24,6 +24,12 @@ function compressBuffer(inputBuffer,fileName){
 function decompressBuffer(compressedBuffer){
 
     const parsed = parseHeader(compressedBuffer);
+
+    const MAX_DECOMPRESSED_SIZE = 150*1024*1024;
+
+    if(parsed.originalSize > MAX_DECOMPRESSED_SIZE){
+        throw new Error("Decompressed file is too large. Maximum allowed size is 150 MB.");
+    }
 
     const frequencyTotal = parsed.frequencyTable.reduce((total,frequency) => total + frequency, 0);
     if(frequencyTotal!=parsed.originalSize){

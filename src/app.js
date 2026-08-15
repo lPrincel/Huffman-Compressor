@@ -8,7 +8,7 @@ app.use(cors({
     origin: "http://localhost:5173",
     exposedHeaders: [
         "Content-Disposition",
-        "X-Origin-Size",
+        "X-Original-Size",
         "X-Compressed-Size"
     ]
 }));
