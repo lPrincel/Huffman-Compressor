@@ -1,4 +1,6 @@
 const MAGIC = Buffer.from("HFC2");
+const FIXED_HEADER_SIZE = 4+4+1;
+const FREQUENCY_TABLE_SIZE = 256*4;
 
 function createHeader(frequencyTable, originalSize, fileName){
     const fileNameBuffer = Buffer.from(fileName);
@@ -14,9 +16,9 @@ function createHeader(frequencyTable, originalSize, fileName){
 
     let offset = 0;
 
-    MAGIC.copy(header,offset);
+    MAGIC.copy(header,offset); 
     offset+=4;
-    
+
     header.writeUInt32BE(originalSize,offset);
     offset+=4;
     
@@ -35,6 +37,10 @@ function createHeader(frequencyTable, originalSize, fileName){
 }
 
 function parseHeader(compressedFileBuffer){
+    if(compressedFileBuffer.length < FIXED_HEADER_SIZE){
+        throw new Error("Invalid compressed file: header is too short")
+    }
+
     let offset = 0;
     const fileMagic = compressedFileBuffer.subarray(offset,offset+4);
     offset+=4;
@@ -42,13 +48,19 @@ function parseHeader(compressedFileBuffer){
     if(!fileMagic.equals(MAGIC)){
         throw new Error("Invalid compressed file: HFC2 header not found");
     }
-    let originalSize=compressedFileBuffer.readUInt32BE(offset);
+    const originalSize=compressedFileBuffer.readUInt32BE(offset);
     offset+=4;
 
-    let fileNameLength = compressedFileBuffer.readUInt8(offset);
+    const fileNameLength = compressedFileBuffer.readUInt8(offset);
     offset+=1;
 
-    let fileName = compressedFileBuffer.subarray(offset,offset+fileNameLength).toString();
+    const fullHeaderSize = FIXED_HEADER_SIZE + fileNameLength + FREQUENCY_TABLE_SIZE;
+
+    if(compressedFileBuffer.length < fullHeaderSize){
+        throw new Error("Invalid compressed file: Header is incomplete");
+    }
+
+    const fileName = compressedFileBuffer.subarray(offset,offset+fileNameLength).toString();
     offset+=fileNameLength;
 
     const frequencyTable = Array(256).fill(0);

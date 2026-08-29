@@ -26,6 +26,9 @@ class BitWriter{
             this.EncodedBuffer[this.writtenBytes] = this.Byte;
             this.writtenBytes++;
         }
+        if(this.writtenBytes !== this.EncodedBuffer.length){
+            throw new Error("Error in bit writing");
+        }
         return this.EncodedBuffer;
     }
 }

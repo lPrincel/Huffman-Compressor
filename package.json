@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "cli": "node src/cli.js",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
@@ -14,7 +14,9 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "mongoose": "^9.9.4",
     "multer": "^2.2.0",
     "nodemon": "^3.1.14"
   }
