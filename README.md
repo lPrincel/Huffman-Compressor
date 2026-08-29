@@ -1,5 +1,7 @@
 # File Compressor
 
+**[🌍 View Live Demo](https://huffman-compressor-nine.vercel.app/)**
+
 A full-stack, lossless file-compression web application that compares **Huffman Coding** and **Run-Length Encoding (RLE)** in real-time. Built as an educational dive into Data Structures and Algorithms (DSA), this project analyzes any uploaded file, recommends the most efficient compression algorithm, and allows users to download and restore custom `.hfc` or `.rle` archives losslessly.
 
 
